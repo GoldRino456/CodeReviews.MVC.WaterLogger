@@ -1,0 +1,55 @@
+﻿@page
+@model FitnessTracker.Pages.DetailsModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.LogEntryData.Date)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.LogEntryData.Date)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.LogEntryData.ExerciseName)
+        </dt>
+        <dd class="col-sm-10">
+            <a asp-page="./ExerciseDisplay" asp-route-id="@Model.LogEntryData.ExerciseId">@Html.DisplayFor(model => model.LogEntryData.ExerciseName)</a>
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.LogEntryData.Sets)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.LogEntryData.Sets)
+        </dd>
+        @if(Model.LogEntryData.IsTimeBasedExercise)
+        {
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.LogEntryData.Time)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.LogEntryData.Time)
+            </dd>
+        }
+        else
+        {
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.LogEntryData.Reps)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.LogEntryData.Reps)
+            </dd>
+        }
+    </dl>
+    <div></div>
+</div>
+<div>
+    <a button type="button" class="btn btn-primary" asp-page="./Edit" asp-route-id="@Model.LogEntryData.Id">Edit</a> |
+    <a button type="button" class="btn btn-primary" asp-page="./Index">Go Back</a>
+</div>

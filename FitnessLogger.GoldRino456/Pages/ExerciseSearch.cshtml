@@ -1,0 +1,49 @@
+﻿@page
+@model ExerciseSearchModel
+@{
+    ViewData["Title"] = "Exercise Search";
+}
+<h1>@ViewData["Title"]</h1>
+
+<form method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group">
+            <input type="search" asp-for="SearchQuery" id="searchBar" value="@Model.SearchQuery"/>
+            <input type="submit" value="Submit" class="btn btn-primary" />
+            <span asp-validation-for="SearchQuery" class="text-danger"></span>
+        </div>
+</form>
+
+<div>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.SearchResults[0].name)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.SearchResults[0].targetMuscles)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.SearchResults[0].equipments)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.SearchResults)
+            {
+                <tr>
+                    <td>
+                        <a asp-page="./ExerciseDisplay" asp-route-id="@item.exerciseId" asp-route-query="@Model.SearchQuery">@Html.DisplayFor(modelItem => item.name)</a> 
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.targetMuscles)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.equipments)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

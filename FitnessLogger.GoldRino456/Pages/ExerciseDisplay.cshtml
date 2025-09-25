@@ -1,0 +1,75 @@
+﻿@page
+@model FitnessTracker.Pages.ExerciseDisplayModel
+@{
+	ViewData["Title"] = "Exercise Details";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.ExerciseData.name)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.ExerciseData.name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.ExerciseData.targetMuscles)
+        </dt>
+        <dd class="col-sm-10">
+            @foreach (var line in Model.ExerciseData.targetMuscles)
+            {
+                <div>@line</div>
+            }
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.ExerciseData.bodyParts)
+        </dt>
+        <dd class="col-sm-10">
+            @foreach (var line in Model.ExerciseData.bodyParts)
+            {
+                <div>@line</div>
+            }
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.ExerciseData.equipments)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.ExerciseData.equipments)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.ExerciseData.secondaryMuscles)
+        </dt>
+        <dd class="col-sm-10">
+            @foreach(var line in Model.ExerciseData.secondaryMuscles)
+            {
+                <div>@line</div>
+            }
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.ExerciseData.gifUrl)
+        </dt>
+        <dd class="col-sm-10">
+            <img src="@Model.ExerciseData.gifUrl"/>
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.ExerciseData.instructions)
+        </dt>
+        <dd class="col-sm-10">
+            @foreach (var line in Model.ExerciseData.instructions)
+            {
+                <div>@line</div>
+            }
+        </dd>
+    </dl>
+</div>
+<div>
+    @if (!String.IsNullOrWhiteSpace(Model.SearchQuery))
+    {
+        <a button type="button" class="btn btn-primary" asp-page="./ExerciseSearch" asp-route-query="@Model.SearchQuery">Back To Search Results</a>
+    }
+
+    <a button type="button" class="btn btn-primary" asp-page="./Index">Return To Home</a>
+</div>
