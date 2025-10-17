@@ -15,7 +15,17 @@ public class DetailsModel : PageModel
         _context = context;
     }
 
-    public LogEntryData LogEntryData { get; set; } = default!;
+    public LogEntryData LogEntryData { get; set; } = new LogEntryData
+    {
+        Date = DateTime.MinValue,
+        ExerciseName = "",
+        Sets = 0,
+        Reps = 0,
+        Time = 0.0f,
+        IsTimeBasedExercise = false
+    };
+
+    public string? ErrorMessage { get; private set; } = null;
 
     public async Task<IActionResult> OnGetAsync(int? id)
     {
@@ -24,12 +34,20 @@ public class DetailsModel : PageModel
             return NotFound();
         }
 
-        var logentrydata = await _context.ExcerciseLogEntries.FirstOrDefaultAsync(m => m.Id == id);
-
-        if (logentrydata is not null)
+        try
         {
-            LogEntryData = logentrydata;
+            var logentrydata = await _context.ExcerciseLogEntries.FirstOrDefaultAsync(m => m.Id == id);
 
+            if (logentrydata is not null)
+            {
+                LogEntryData = logentrydata;
+
+                return Page();
+            }
+        }
+        catch
+        {
+            ErrorMessage = "ERROR: Could not retrieve entry from database. Please try refreshing the page.";
             return Page();
         }
 

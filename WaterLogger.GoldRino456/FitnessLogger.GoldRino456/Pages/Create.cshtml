@@ -6,8 +6,13 @@
         }
         
         <h1>Create</h1>
-        
+
     <hr />
+
+@if (!String.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <p style="color: red;">@Model.ErrorMessage</p>
+}
     <div class="row">
     <div class="col-md-4">
     <form method="post">

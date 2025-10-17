@@ -7,7 +7,8 @@ namespace FitnessTracker.Pages;
 public class IndexModel : PageModel
 {
     private readonly Data.ExerciseLogDbContext _context;
-    public IList<LogEntryData> LogEntryData { get; set; } = default!;
+    public IList<LogEntryData> LogEntryData { get; set; } = [];
+    public string? ErrorMessage { get; private set; } = null;
 
     public IndexModel(Data.ExerciseLogDbContext context)
     {
@@ -16,6 +17,13 @@ public class IndexModel : PageModel
 
     public async Task OnGetAsync()
     {
-        LogEntryData = await _context.ExcerciseLogEntries.OrderByDescending(x => x.Date).ToListAsync();
+        try
+        {
+            LogEntryData = await _context.ExcerciseLogEntries.OrderByDescending(x => x.Date).ToListAsync();
+        }
+        catch
+        {
+            ErrorMessage = "ERROR: Could not load data from the database. Please try refreshing the page.";
+        }
     }
 }

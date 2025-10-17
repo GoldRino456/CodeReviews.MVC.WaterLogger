@@ -16,7 +16,16 @@ public class EditModel : PageModel
     }
 
     [BindProperty]
-    public LogEntryData LogEntryData { get; set; } = default!;
+    public LogEntryData LogEntryData { get; set; } = new LogEntryData
+    {
+        Date = DateTime.MinValue,
+        ExerciseName = "",
+        Sets = 0,
+        Reps = 0,
+        Time = 0.0f,
+        IsTimeBasedExercise = false
+    };
+    public string? ErrorMessage { get; private set; } = null;
 
     public async Task<IActionResult> OnGetAsync(int? id)
     {
@@ -25,7 +34,19 @@ public class EditModel : PageModel
             return NotFound();
         }
 
-        var logentrydata = await _context.ExcerciseLogEntries.FirstOrDefaultAsync(m => m.Id == id);
+        LogEntryData? logentrydata;
+
+        try
+        {
+           logentrydata = await _context.ExcerciseLogEntries.FirstOrDefaultAsync(m => m.Id == id);
+        }
+        catch
+        {
+            ErrorMessage = "ERROR: Trouble communicating with database. Please try reloading the page.";
+            return Page();
+        }
+
+
         if (logentrydata == null)
         {
             return NotFound();
@@ -65,13 +86,12 @@ public class EditModel : PageModel
             return Page();
         }
 
-        _context.Attach(LogEntryData).State = EntityState.Modified;
-
         try
         {
+            _context.Attach(LogEntryData).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
-        catch (DbUpdateConcurrencyException)
+        catch
         {
             if (!LogEntryDataExists(LogEntryData.Id))
             {
@@ -79,7 +99,8 @@ public class EditModel : PageModel
             }
             else
             {
-                throw;
+                ErrorMessage = "ERROR: Could not update entry in database. Please try refreshing the page.";
+                return Page();
             }
         }
 

@@ -2,6 +2,7 @@
 using FitnessTracker.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace FitnessTracker.Pages;
 
@@ -11,6 +12,7 @@ public class CreateModel : PageModel
 
     [BindProperty]
     public LogEntryData LogEntryData { get; set; } = default!;
+    public string? ErrorMessage { get; private set; } = null;
 
     public CreateModel(Data.ExerciseLogDbContext context)
     {
@@ -53,8 +55,16 @@ public class CreateModel : PageModel
             return Page();
         }
 
-        _context.ExcerciseLogEntries.Add(LogEntryData);
-        await _context.SaveChangesAsync();
+        try
+        {
+            _context.ExcerciseLogEntries.Add(LogEntryData);
+            await _context.SaveChangesAsync();
+        }
+        catch
+        {
+            ErrorMessage = "ERROR: Could not save data to database. Please try refreshing the page.";
+            return Page();
+        }
 
         return RedirectToPage("./Index");
     }

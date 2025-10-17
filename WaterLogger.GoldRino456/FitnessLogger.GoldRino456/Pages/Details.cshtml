@@ -7,6 +7,11 @@
 
 <h1>Details</h1>
 
+@if (!String.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <p style="color: red;">@Model.ErrorMessage</p>
+}
+
 <div>
     <hr />
     <dl class="row">
