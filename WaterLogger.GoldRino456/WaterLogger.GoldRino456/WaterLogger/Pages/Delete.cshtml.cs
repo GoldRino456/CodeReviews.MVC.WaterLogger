@@ -4,60 +4,59 @@ using Microsoft.Data.Sqlite;
 using System.Globalization;
 using WaterLogger.Models;
 
-namespace WaterLogger.Pages
+namespace WaterLogger.Pages;
+
+public class DeleteModel : PageModel
 {
-    public class DeleteModel : PageModel
+    private readonly IConfiguration _configuration;
+    [BindProperty] public DrinkingWaterModel DrinkingWater { get; set; }
+
+    public DeleteModel(IConfiguration configuration)
     {
-        private readonly IConfiguration _configuration;
-        [BindProperty] public DrinkingWaterModel DrinkingWater { get; set; }
+        _configuration = configuration;
+    }
+    public IActionResult OnGet(int id)
+    {
+        DrinkingWater = GetById(id);
 
-        public DeleteModel(IConfiguration configuration)
+        return Page();
+    }
+
+    private DrinkingWaterModel GetById(int id)
+    {
+        var drinkingWaterRecord = new DrinkingWaterModel();
+
+        using(var connection = new SqliteConnection(_configuration.GetConnectionString("DefaultConnection")))
         {
-            _configuration = configuration;
-        }
-        public IActionResult OnGet(int id)
-        {
-            DrinkingWater = GetById(id);
+            connection.Open();
+            var tableCmd = connection.CreateCommand();
+            tableCmd.CommandText = $"SELECT * FROM drinking_water WHERE Id = {id}";
 
-            return Page();
-        }
+            SqliteDataReader reader = tableCmd.ExecuteReader();
 
-        private DrinkingWaterModel GetById(int id)
-        {
-            var drinkingWaterRecord = new DrinkingWaterModel();
-
-            using(var connection = new SqliteConnection(_configuration.GetConnectionString("DefaultConnection")))
+            while(reader.Read())
             {
-                connection.Open();
-                var tableCmd = connection.CreateCommand();
-                tableCmd.CommandText = $"SELECT * FROM drinking_water WHERE Id = {id}";
-
-                SqliteDataReader reader = tableCmd.ExecuteReader();
-
-                while(reader.Read())
-                {
-                    drinkingWaterRecord.Id = reader.GetInt32(0);
-                    drinkingWaterRecord.Date = DateTime.Parse(reader.GetString(1),
-                        CultureInfo.CurrentUICulture.DateTimeFormat);
-                    drinkingWaterRecord.Quantity = reader.GetInt32(2);
-                }
-
-                return drinkingWaterRecord;
-            }
-        }
-
-        public IActionResult OnPost(int id)
-        {
-            using (var connection = new SqliteConnection(_configuration.GetConnectionString("DefaultConnection")))
-            {
-                connection.Open();
-                var tableCmd = connection.CreateCommand();
-
-                tableCmd.CommandText = $"DELETE from drinking_water WHERE Id = {id}";
-                tableCmd.ExecuteNonQuery();
+                drinkingWaterRecord.Id = reader.GetInt32(0);
+                drinkingWaterRecord.Date = DateTime.Parse(reader.GetString(1),
+                    CultureInfo.CurrentUICulture.DateTimeFormat);
+                drinkingWaterRecord.Quantity = reader.GetInt32(2);
             }
 
-            return RedirectToPage("./Index");
+            return drinkingWaterRecord;
         }
+    }
+
+    public IActionResult OnPost(int id)
+    {
+        using (var connection = new SqliteConnection(_configuration.GetConnectionString("DefaultConnection")))
+        {
+            connection.Open();
+            var tableCmd = connection.CreateCommand();
+
+            tableCmd.CommandText = $"DELETE from drinking_water WHERE Id = {id}";
+            tableCmd.ExecuteNonQuery();
+        }
+
+        return RedirectToPage("./Index");
     }
 }

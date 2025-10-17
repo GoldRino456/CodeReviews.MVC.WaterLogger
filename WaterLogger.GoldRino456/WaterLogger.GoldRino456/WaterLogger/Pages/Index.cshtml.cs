@@ -3,48 +3,47 @@ using Microsoft.Data.Sqlite;
 using System.Globalization;
 using WaterLogger.Models;
 
-namespace WaterLogger.Pages
+namespace WaterLogger.Pages;
+
+public class IndexModel : PageModel
 {
-    public class IndexModel : PageModel
+    private readonly IConfiguration _configuration;
+    public List<DrinkingWaterModel> Records { get; set; }
+
+    public IndexModel(IConfiguration configuration)
     {
-        private readonly IConfiguration _configuration;
-        public List<DrinkingWaterModel> Records { get; set; }
+        _configuration = configuration;
+    }
 
-        public IndexModel(IConfiguration configuration)
-        {
-            _configuration = configuration;
-        }
+    public void OnGet()
+    {
+        Records = GetAllRecords();
+        ViewData["Total"] = Records.AsEnumerable().Sum(x => x.Quantity);
+    }
 
-        public void OnGet()
+    private List<DrinkingWaterModel> GetAllRecords()
+    {
+        using(var connection = new SqliteConnection(_configuration.GetConnectionString("DefaultConnection")))
         {
-            Records = GetAllRecords();
-            ViewData["Total"] = Records.AsEnumerable().Sum(x => x.Quantity);
-        }
+            connection.Open();
+            var tableCmd = connection.CreateCommand();
+            tableCmd.CommandText = $"SELECT * FROM drinking_water";
 
-        private List<DrinkingWaterModel> GetAllRecords()
-        {
-            using(var connection = new SqliteConnection(_configuration.GetConnectionString("DefaultConnection")))
+            var tableData = new List<DrinkingWaterModel>();
+            SqliteDataReader reader = tableCmd.ExecuteReader();
+
+            while (reader.Read())
             {
-                connection.Open();
-                var tableCmd = connection.CreateCommand();
-                tableCmd.CommandText = $"SELECT * FROM drinking_water";
-
-                var tableData = new List<DrinkingWaterModel>();
-                SqliteDataReader reader = tableCmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    tableData.Add(
-                        new DrinkingWaterModel()
-                        {
-                            Id = reader.GetInt32(0),
-                            Date = DateTime.Parse(reader.GetString(1), CultureInfo.CurrentUICulture.DateTimeFormat),
-                            Quantity = reader.GetInt32(2)
-                        });
-                }
-
-                return tableData;
+                tableData.Add(
+                    new DrinkingWaterModel()
+                    {
+                        Id = reader.GetInt32(0),
+                        Date = DateTime.Parse(reader.GetString(1), CultureInfo.CurrentUICulture.DateTimeFormat),
+                        Quantity = reader.GetInt32(2)
+                    });
             }
+
+            return tableData;
         }
     }
 }

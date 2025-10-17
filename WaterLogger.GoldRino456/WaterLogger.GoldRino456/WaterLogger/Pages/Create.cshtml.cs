@@ -3,43 +3,42 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.Sqlite;
 using WaterLogger.Models;
 
-namespace WaterLogger.Pages
+namespace WaterLogger.Pages;
+
+public class CreateModel : PageModel
 {
-    public class CreateModel : PageModel
+    private readonly IConfiguration _configuration;
+
+    public CreateModel(IConfiguration configuration)
     {
-        private readonly IConfiguration _configuration;
+        _configuration = configuration;
+    }
 
-        public CreateModel(IConfiguration configuration)
-        {
-            _configuration = configuration;
-        }
+    public IActionResult OnGet()
+    {
+        return Page();
+    }
 
-        public IActionResult OnGet()
+    [BindProperty]
+    public DrinkingWaterModel DrinkingWater { get; set; }
+
+    public IActionResult OnPost()
+    {
+        if(!ModelState.IsValid)
         {
             return Page();
         }
 
-        [BindProperty]
-        public DrinkingWaterModel DrinkingWater { get; set; }
-
-        public IActionResult OnPost()
+        using(var connection = new SqliteConnection(_configuration.GetConnectionString("DefaultConnection")))
         {
-            if(!ModelState.IsValid)
-            {
-                return Page();
-            }
+            connection.Open();
+            var tableCmd = connection.CreateCommand();
+            tableCmd.CommandText =
+                $"INSERT INTO drinking_water(date, quantity) VALUES('{DrinkingWater.Date}', '{DrinkingWater.Quantity}')";
 
-            using(var connection = new SqliteConnection(_configuration.GetConnectionString("DefaultConnection")))
-            {
-                connection.Open();
-                var tableCmd = connection.CreateCommand();
-                tableCmd.CommandText =
-                    $"INSERT INTO drinking_water(date, quantity) VALUES('{DrinkingWater.Date}', '{DrinkingWater.Quantity}')";
-
-                tableCmd.ExecuteNonQuery();
-            }
-
-            return RedirectToPage("./Index");
+            tableCmd.ExecuteNonQuery();
         }
+
+        return RedirectToPage("./Index");
     }
 }

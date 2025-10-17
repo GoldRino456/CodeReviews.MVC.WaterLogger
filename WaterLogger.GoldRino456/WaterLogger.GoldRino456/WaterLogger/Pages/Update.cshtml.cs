@@ -4,67 +4,66 @@ using Microsoft.Data.Sqlite;
 using System.Globalization;
 using WaterLogger.Models;
 
-namespace WaterLogger.Pages
+namespace WaterLogger.Pages;
+
+public class UpdateModel : PageModel
 {
-    public class UpdateModel : PageModel
+    private readonly IConfiguration _configuration;
+    [BindProperty] public DrinkingWaterModel DrinkingWater { get; set; }
+
+    public UpdateModel(IConfiguration configuration)
     {
-        private readonly IConfiguration _configuration;
-        [BindProperty] public DrinkingWaterModel DrinkingWater { get; set; }
+        _configuration = configuration;
+    }
 
-        public UpdateModel(IConfiguration configuration)
+    public IActionResult OnGet(int id)
+    {
+        DrinkingWater = GetById(id);
+
+        return Page();
+    }
+
+    private DrinkingWaterModel GetById(int id)
+    {
+        var drinkingWaterRecord = new DrinkingWaterModel();
+
+        using (var connection = new SqliteConnection(_configuration.GetConnectionString("DefaultConnection")))
         {
-            _configuration = configuration;
+            connection.Open();
+            var tableCmd = connection.CreateCommand();
+            tableCmd.CommandText = $"SELECT * FROM drinking_water WHERE Id = {id}";
+
+            SqliteDataReader reader = tableCmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                drinkingWaterRecord.Id = reader.GetInt32(0);
+                drinkingWaterRecord.Date = DateTime.Parse(reader.GetString(1),
+                    CultureInfo.CurrentUICulture.DateTimeFormat);
+                drinkingWaterRecord.Quantity = reader.GetInt32(2);
+            }
+
+            return drinkingWaterRecord;
         }
+    }
 
-        public IActionResult OnGet(int id)
+    public IActionResult OnPost()
+    {
+        if (!ModelState.IsValid)
         {
-            DrinkingWater = GetById(id);
-
             return Page();
         }
 
-        private DrinkingWaterModel GetById(int id)
+        using (var connection = new SqliteConnection(_configuration.GetConnectionString("DefaultConnection")))
         {
-            var drinkingWaterRecord = new DrinkingWaterModel();
+            connection.Open();
+            var tableCmd = connection.CreateCommand();
+            tableCmd.CommandText =
+                $"UPDATE drinking_water SET date = '{DrinkingWater.Date}', quantity = '{DrinkingWater.Quantity}' WHERE Id = {DrinkingWater.Id}";
 
-            using (var connection = new SqliteConnection(_configuration.GetConnectionString("DefaultConnection")))
-            {
-                connection.Open();
-                var tableCmd = connection.CreateCommand();
-                tableCmd.CommandText = $"SELECT * FROM drinking_water WHERE Id = {id}";
-
-                SqliteDataReader reader = tableCmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    drinkingWaterRecord.Id = reader.GetInt32(0);
-                    drinkingWaterRecord.Date = DateTime.Parse(reader.GetString(1),
-                        CultureInfo.CurrentUICulture.DateTimeFormat);
-                    drinkingWaterRecord.Quantity = reader.GetInt32(2);
-                }
-
-                return drinkingWaterRecord;
-            }
+            tableCmd.ExecuteNonQuery();
         }
 
-        public IActionResult OnPost()
-        {
-            if (!ModelState.IsValid)
-            {
-                return Page();
-            }
-
-            using (var connection = new SqliteConnection(_configuration.GetConnectionString("DefaultConnection")))
-            {
-                connection.Open();
-                var tableCmd = connection.CreateCommand();
-                tableCmd.CommandText =
-                    $"UPDATE drinking_water SET date = '{DrinkingWater.Date}', quantity = '{DrinkingWater.Quantity}' WHERE Id = {DrinkingWater.Id}";
-
-                tableCmd.ExecuteNonQuery();
-            }
-
-            return RedirectToPage("./Index");
-        }
+        return RedirectToPage("./Index");
     }
 }
